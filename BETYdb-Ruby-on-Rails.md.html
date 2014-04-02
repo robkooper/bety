@@ -1,0 +1,60 @@
+<h1>Ruby-on-Rails</h1>
+<h2>Deploying a new version:</h2>
+<ol>
+<li>test on <code>pecandev.igb.illinois.edu:/usr/local/ebi</code></li>
+<li>test on <code>ebi-forecast.igb.illinois.edu:/usr/local/beta</code></li>
+<li>deploy on <code>ebi-forecast.igb.illinois.edu:/usr/local/ebi</code></li>
+</ol>
+<p><code>{bash}
+cd /usr/local/ebi
+git status
+git pull
+touch tmp/restart.txt</code></p>
+<h2>Commenting in the Rails Models</h2>
+<p>Example of a properly commented citation model (
+/app/models/citations.rb ):
+<a href="https://gist.github.com/e68fea1baa070e68b984">https://gist.github.com/e68fea1baa070e68b984</a></p>
+<p>And a properly commented covariates model ( /app/models/covariates.rb
+):
+<a href="https://gist.github.com/5d0d96d7be1b1fd7b47c">https://gist.github.com/5d0d96d7be1b1fd7b47c</a></p>
+<h2>Introduction to MVC</h2>
+<h2>Source Code Map</h2>
+<h2>Misc. Information</h2>
+<h3>Providing model output for download</h3>
+<p>Access to download model output is in app/views/maps/locations_yields.html.erb</p>
+<h3>Related Issues / Commits:</h3>
+<p>https://github.com/PecanProject/bety/commit/7b7d56fdf4c577fa14d65fcf81c677f5a4bf0633</p>
+<h2>Testing</h2>
+<p>As of commit 92ec3eed Our application has a quick and easy way to setup a test environment.</p>
+<ol>
+<li>Create a test database, and have the login credentials for that database in /config/database.yml
+```
+$ mysql -u root -p<blockquote>
+<p>create database bety_test;
+grant all privileges on bety to bety_user@localhost;
+exit;
+```</p>
+</blockquote>
+</li>
+<li>Config the connection to the bety_test in RAILS_DIR/config/database.yml
+<code>test:
+  adapter: mysql2
+  encoding: latin1 
+  reconnect: false
+  database: ebi_test
+  pool: 5
+  username: bety_user
+  password: somepassword</code></li>
+<li>Build up the test database from the current schema:
+<code>$ rake db:test:load</code></li>
+<li>Load the fixtures ( essentially dummy-data used for testing )
+<code>$ rake db:fixtures:load RAILS_ENV=test</code></li>
+<li>Run the tests
+<code>$ rspec spec/</code>
+... OR ...</li>
+<li>Run a specific individual test
+<code>$ rspec spec/features/user_integration_spec.rb</code></li>
+<li>Expect to see some kind of output like this:
+<code>Finished in 13.73 seconds
+29 examples, 0 failures</code></li>
+</ol>
