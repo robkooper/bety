@@ -1,6 +1,11 @@
 name: DB Dump
 
 on:
+  push:
+    branches:
+      - master
+      - develop
+
   schedule:
     - cron: '0 0 * * *'
 
@@ -30,24 +35,65 @@ jobs:
           psql -h localhost -U postgres -d bety -c "CREATE EXTENSION postgis;"
 
       - name: Sync with EBI
-        run: script/load.bety.sh -a "postgres" -p "-h localhost" -d "bety" -o bety -m 99 -r 0 -c -w https://ebi-forecast.igb.illinois.edu/pecan/dump/bety.tar.gz
+        run: script/load.bety.sh -a "postgres" -p "-h localhost" -d "bety" -o bety -m 99 -r 0 -c -w http://www.betydb.org/dump/bety.tar.gz
 
       - name: Sync with BU
         run: script/load.bety.sh -a "postgres" -p "-h localhost" -d "bety" -o bety -m 99 -r 1
 
-      #- name: Sync with BNL
-      #  run: script/load.bety.sh -a "postgres" -p "-h localhost" -d "bety" -o bety -m 99 -r 2 -w ftp://anon:anon@ftp.test.bnl.gov/outgoing/betydb/bety.tar.gz
+      - name: Sync with BNL
+        run: script/load.bety.sh -a "postgres" -p "-h localhost" -d "bety" -o bety -m 99 -r 2 -w ftp://anon:anon@ftp.test.bnl.gov/outgoing/betydb/bety.tar.gz
 
       - name: Sync with Wisconsin
-        run: script/load.bety.sh -a "postgres" -p "-h localhost" -d "bety" -o bety -m 99 -r 5 -w http://fen.aos.wisc.edu:6480/sync/dump/bety.tar.gz
+        run: script/load.bety.sh -a "postgres" -p "-h localhost" -d "bety" -o bety -m 99 -r 5 -w http://tree.aos.wisc.edu:6480/sync/dump/bety.tar.gz
 
       - name: Dump Database
-        run: pg_dump -h localhost -U postgres -F c bety > initdb/db.dump
+        run: |
+          PG=$(docker ps | awk '/postgis/ { print $1 }')
+          docker exec ${PG} pg_dump -h localhost -U postgres -F c bety > initdb/db.dump
 
       - name: Build Docker with Database dump
         run: |
           cd initdb
           docker build --tag image --file Dockerfile .
+
+      - name: Build smaller dump for CI runs
+        # update on scheduled runs, not every PR
+        if: github.event.schedule != ''
+        run: |
+          # Nuke some large tables not used in testing
+          #  (to avoid foreign key constraints when deleting their child inputs)
+          docker exec ${PG} psql -h localhost -U bety -c "
+            TRUNCATE runs,likelihoods,benchmarks CASCADE"
+          # Drop unneeded records from inputs table
+          # (loop is because many are referenced only by descendent inputs
+          #   that are themselves deleted here.)
+          while [ "$DEL_RES" != "DELETE 0" ]; do
+            DEL_RES=$(
+              docker exec ${PG} psql -h localhost -U bety -c "
+                DELETE FROM inputs WHERE
+                  id NOT IN (
+                    SELECT DISTINCT container_id FROM dbfiles
+                    WHERE container_type = 'Input'
+                    AND container_id IS NOT null)
+                  AND id NOT IN (
+                    SELECT DISTINCT parent_id FROM inputs
+                    WHERE parent_id IS NOT null);"
+              ) || break
+              echo ${DEL_RES}
+          done
+          # CI tests don't need any records from the excluded tables, just schemas
+          docker exec ${PG} pg_dump \
+            -h localhost -U bety \
+            --exclude-table-data='runs*' \
+            --exclude-table-data='inputs_runs*' \
+            --exclude-table-data='likelihoods*' \
+            --exclude-table-data='ensembles*' \
+            --exclude-table-data='posteriors_ensembles*' \
+            --exclude-table-data='benchmarks*' \
+            --exclude-table-data='reference_runs*' \
+            -F c \
+            bety > initdb/db.dump
+          docker build --tag image_ci --file Dockerfile .
 
       - name: Login into registry
         run: |
@@ -68,3 +114,9 @@ jobs:
               docker push pecan/db:$T
             fi
           done
+          if [ -n "$(docker image ls -q image_ci)" ]; then
+            docker tag image_ci $IMAGE_ID:ci
+            docker push $IMAGE_ID:ci
+            docker tag image_ci pecan/db:ci
+            docker push pecan/db:ci
+          fi

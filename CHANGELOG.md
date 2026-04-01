@@ -17,20 +17,40 @@ You will need to install the latest version of BETY (or the version you want to 
 
 In this case you can simply pull down the version you want, and run `docker-compose bety migrate`.
 
-## [Unreleased]
+## [5.x] -
+
+### Changed
+
+- License changed from UIUC/NCSA to BSD 3-Clause [#748](https://github.com/PecanProject/bety/pull/758). 
+  The licenses are functionally the same, but BSD 3-Clause is more widely recognized. 
+  This change is consistent with moving R packages in PEcAn project to BSD 3-Clause to comply with CRAN requirements.  
+- Updated GitHub actions to test and use supported versions of Rails (v2.7) and Postgres (12.3.3) [#753](https://github.com/PecanProject/bety/pull/753)
+  - **Important** Users who use the docker-compose file will need to either: 
+    - dump the database first and then reload because this involves a database version upgrade
+    - switch the postgres image back to mdillon/postgis:9.5. This is not recommended because postgres v9.5 is no longer supported.
+
+
+## [5.4.1] - 2021-10-10
+
+### Changed
+- sprockets will now also parse custom folder
+
+## [5.4.0] - 2021-10-07
 
 ### Added
 - configuration to sync forks of BETY using https://github.com/wei/pull
+- configuration to set root_url
 
 ### Fixes
 - Fixes to the docker build to fit in kubernetes helm chart.
 - Added Wisconsin back to database dump workflow
 - Catch exception when load.bety fails and cleans up /tmp folder
+- Fix problem with sendmail causing error on new user sign up https://github.com/PecanProject/bety/issues/677
 
 ### Changed
 
 - [#705](https://github.com/PecanProject/bety/pull/705) : More clearly indicate method is optional in bulk upload
-- updated rails to 5.1.7
+- updated rails to 5.2.4.6
 - removed static route, it was only used to render 404.
 - allow n=1 in bulk upload https://github.com/PecanProject/bety/pull/704
 

@@ -4,16 +4,18 @@
 
 
 organization:
-  name: "Energy Biosciences Institute"
+  name: "Organization Name Here"
   url: #{root_path}
   logo_file: "logo-ebi.png"
 
-site_identification_markup: "<strong>BETY</strong>db <small><strong>Biofuel Ecophysiological Traits and Yields </strong>Database</small>"
+site_identification_markup: "<strong>PEcAn</strong>db <small><strong>The PEcAn</strong>Database</small>"
 
 
 # Footer
+footer_background_image_file: "https://energybiosciencesinstitute.org/wp-content/themes/ebi/assets/logo.png"
 
-footer_background_image_file: "logo-ebi-footer.jpg"
+# google analyitics
+google_analytics_id: <%= ENV["GOOGLE_ANALYTICS_ID"] || 'G-0000000000' %>
 
 ## Contact Information
 admin_phone: "(000) 000-0000"
@@ -22,7 +24,7 @@ admin_email: "admin@example.com" # a test
 citation_license_copyright_markup:
 
   '<p>LeBauer, David, Rob Kooper, Patrick Mulrooney, Scott Rohde, Dan Wang, 
-  Stephen Long, Michael Dietze, (2017). BETYdb: A yield, trait, and ecosystem 
+  Stephen Long, Michael Dietze, (2018). BETYdb: A yield, trait, and ecosystem 
   service database applied to second‐generation bioenergy feedstock production.
   GCB Bioenergy. doi:10.1111/gcbb.12420</p>
 
@@ -60,23 +62,20 @@ sponsors:
 
 # Home Page
 
-homepage_heading: "Welcome to BETYdb"
+homepage_heading: "Welcome to someones unconfigured instance of BETYdb"
 
 homepage_body:
 
   lead_text:
 
-    The emerging biofuel industry may aid in reducing greenhouse gas emissions and
-    decreasing dependence on foreign oil importation.
+    This database supports research.
 
   marked_up_block_text:
 
-    How to develop and implement biofuel crops in an ecologically and economically
-    sustainable way requires evaluating the growth and functionality of biofuel
-    crops from the local scale to the regional scale. <strong
-    class="green">BETYdb</strong> has been developed to support research,
-    agriculture, and policy by synthesizing available information on potential
-    biofuel crops.
+    This is an unconfigured instance of the BETYdb website that 
+    provides an interface to a BETYdb database that is running somewhere.
+    The website maintainer should edit the application.yml.template file found in the 
+    config directory.
 
   photo:
 
@@ -92,7 +91,7 @@ homepage_body:
 # Miscellaneous
 
 ## This affects both the home page and the footer:
-show_crop_map_links: true
+show_crop_map_links: false
 
 # Override this with a secret key to run a secure site:
 rest_auth_site_key: <%= ENV["SECRET_KEY_BASE"] || 'thisisnotasecret' %>

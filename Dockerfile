@@ -1,4 +1,4 @@
-FROM ruby:2.3
+FROM ruby:2.7
 LABEL maintainer="Max Burnette <mburnet2@illinois.edu>, Rob Kooper <kooper@illinois.edu>"
 
 # arguments that are added at the bottom of BETY
@@ -26,7 +26,8 @@ ENV LOCAL_SERVER=99 \
     PGDATABASE=postgres \
     BETYUSER=bety \
     BETYPASSWORD=bety \
-    BETYDATABASE=bety
+    BETYDATABASE=bety \
+    GOOGLE_ANALYTICS_ID=G-0000000000
 
 # Install dependencies
 RUN apt-get update \
